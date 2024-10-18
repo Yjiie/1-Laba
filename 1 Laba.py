@@ -3,34 +3,42 @@
 Написать программу, которая читая символы из бесконечной последовательности (эмулируется конечным файлом, читающимся поблочно), распознает, преобразует и выводит на экран лексемы по определенному правилу.
 Лексемы разделены пробелами. Преобразование делать по возможности через словарь. Для упрощения под выводом числа прописью подразумевается последовательный вывод всех цифр числа.
 Регулярные выражения использовать нельзя.
-Натуральные числа, не превышающие 1 000 000, у которых вторая слева цифра равна 3.
-Выводит на экран нечетные цифры стоящие в числе справа от этой 3. Цифры, стоящие на нечетных местах (в числе), выводятся прописью.
+Вариант 14.
+Четные двоичные числа, не превышающие 204810, у которых вторая справа цифра равна 0. Выводит на экран цифры числа, исключая нули. Вычисляется среднее число между минимальным и максимальным и выводится прописью.
 '''
-def digit_to_text(digit):  #Функция,которая преобрзует цифры в пропись (словарь)
-    digit_dict = {'0': 'ноль', '1': 'один', '2': 'два', '3': 'три', '4': 'четыре', '5': 'пять', '6': 'шесть', '7': 'семь', '8': 'восемь', '9': 'девять'}
-    return digit_dict.get(digit, '')
+def digit_to_text(digit):
+    words = {
+        '0': 'ноль', '1': 'один', '2': 'два', '3': 'три', '4': 'четыре',
+        '5': 'пять', '6': 'шесть', '7': 'семь', '8': 'восемь', '9': 'девять'
+    }
+    return words.get(digit, '')
+
+def binary_to_digits(binary_str):
+    return ''.join([digit for digit in binary_str if digit != '0'])
+
+def number_to_words(number):
+    return ' '.join([digit_to_text(digit) for digit in str(number)])
+
 def main():
-    buffer_len = 1                                                               #размер буфера чтения
-    work_buffer = ""                                                             #рабочий буфер
-    d_max = 0
-    s_max = ""
-    with open("laba.txt", "r") as file:                                          #открываем файл
-        buffer = file.read(buffer_len)                                           #читаем файл
-        while buffer:                                                            #пока файл не пустой
-            while buffer >= '0' and buffer <= '9':                               #обработка текущего блока
-                work_buffer += buffer
-                buffer = file.read(buffer_len)
-            if len(work_buffer) > 0:
-                if len(work_buffer) >= 3 and work_buffer[1] == '3':             #проверка,что вторая слева цифра = 3
-                    print("Число с второй слева цифрой равной 3:", work_buffer)
-                    print("Нечетные цифры справа от тройки:")
-                    for digit in work_buffer[2:]:
-                        if int(digit) % 2 != 0:                                  #проверка, является ли  цифра нечетной
-                            print(digit)
-                    print("Цифры, стоящие на нечетных местах (в числе):")
-                    for i, digit in enumerate(work_buffer):
-                        if i % 2 != 0:                                           #проверка, находится ли  цифра на нечетной позиции
-                            print(digit_to_text(digit))
-            work_buffer = ''
-            buffer = file.read(buffer_len)
+    buffer_size = 1024
+    valid_numbers = []
+
+    with open('input.txt', 'r') as file:
+        buffer = file.read(buffer_size)
+        while buffer:
+            tokens = buffer.split()
+            for token in tokens:
+                if len(token) > 1 and token[-2] == '0' and int(token, 2) % 2 == 0 and int(token, 2) <= 2048:
+                    valid_numbers.append(int(token, 2))
+                    print(binary_to_digits(token))
+            buffer = file.read(buffer_size)
+
+    if len(valid_numbers) > 1:
+        min_num = min(valid_numbers)
+        max_num = max(valid_numbers)
+        avg_num = (min_num + max_num) // 2
+        print(f"Среднее число между {min_num} и {max_num} - {avg_num} прописью: {number_to_words(avg_num)}")
+    else:
+        print("Недостаточно чисел для вычисления среднего.")
+
 main()
