@@ -7,38 +7,43 @@
 Четные двоичные числа, не превышающие 204810, у которых вторая справа цифра равна 0. Выводит на экран цифры числа, исключая нули. Вычисляется среднее число между минимальным и максимальным и выводится прописью.
 '''
 def digit_to_text(digit):
-    words = {
+    digit_dict = {
         '0': 'ноль', '1': 'один', '2': 'два', '3': 'три', '4': 'четыре',
         '5': 'пять', '6': 'шесть', '7': 'семь', '8': 'восемь', '9': 'девять'
     }
-    return words.get(digit, '')
+    return digit_dict.get(digit, '')
 
-def binary_to_digits(binary_str):
-    return ''.join([digit for digit in binary_str if digit != '0'])
+buffer_len = 1
+work_buffer = ""
+valid_numbers = []
 
-def number_to_words(number):
-    return ' '.join([digit_to_text(digit) for digit in str(number)])
+with open("laba.txt", "r") as file:
+    buffer = file.read(buffer_len)
+    while buffer:
+        while buffer >= '0' and buffer <= '9':
+            work_buffer += buffer
+            buffer = file.read(buffer_len)
 
-def main():
-    buffer_size = 1024
-    valid_numbers = []
+        if len(work_buffer) > 0:
+            if all(c in "01" for c in work_buffer):
+                decimal_value = int(work_buffer, 2)
+                if (
+                    decimal_value <= 2048 and
+                    decimal_value % 2 == 0 and
+                    len(work_buffer) > 1 and work_buffer[-2] == '0'
+                ):
+                    if decimal_value not in valid_numbers:
+                        valid_numbers.append(decimal_value)
+                        print("Цифры числа, исключая нули:", " ".join(c for c in work_buffer if c != '0'))
+            work_buffer = ""
 
-    with open('input.txt', 'r') as file:
-        buffer = file.read(buffer_size)
-        while buffer:
-            tokens = buffer.split()
-            for token in tokens:
-                if len(token) > 1 and token[-2] == '0' and int(token, 2) % 2 == 0 and int(token, 2) <= 2048:
-                    valid_numbers.append(int(token, 2))
-                    print(binary_to_digits(token))
-            buffer = file.read(buffer_size)
+        buffer = file.read(buffer_len)
 
-    if len(valid_numbers) > 1:
-        min_num = min(valid_numbers)
-        max_num = max(valid_numbers)
-        avg_num = (min_num + max_num) // 2
-        print(f"Среднее число между {min_num} и {max_num} - {avg_num} прописью: {number_to_words(avg_num)}")
-    else:
-        print("Недостаточно чисел для вычисления среднего.")
+if valid_numbers:
+    min_value = min(valid_numbers)
+    max_value = max(valid_numbers)
+    avg_value = (min_value + max_value) // 2
+    print("Среднее число прописью:", " ".join(digit_to_text(d) for d in str(avg_value)))
+else:
+    print("Не найдено подходящих чисел.")
 
-main()
